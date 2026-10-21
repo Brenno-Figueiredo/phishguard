@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PhishGuard · Analisador de phishing</title>
+<style>
+:root{
+  --bg:#0b1016;--surface:#121a24;--raised:#1a2735;--line:#263845;--text:#e6eef5;--muted:#8ba0b2;
+  --brand:#2fd4a7;--crit:#ff5c7a;--high:#ff9a45;--med:#f2cd3b;--low:#5aa9ff;--ok:#3ddc84;
+  --sans:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,Roboto,sans-serif;
+  --mono:"Cascadia Mono",ui-monospace,Consolas,monospace;
+}
+@media(prefers-color-scheme:light){:root{--bg:#eef3f6;--surface:#fff;--raised:#eaf1f5;--line:#cfdbe3;
+  --text:#102230;--muted:#5c7484;--brand:#0f9e7a;--crit:#d6234a;--high:#d9700b;--med:#a88a00;--low:#2a6fdb;--ok:#18a34a;}}
+*{box-sizing:border-box}[hidden]{display:none!important}html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:15px/1.55 var(--sans)}
+button{font:inherit;color:inherit;cursor:pointer;border-radius:9px;border:1px solid var(--line);background:var(--raised);padding:9px 16px}
+button:hover{border-color:var(--brand)}button.primary{background:var(--brand);border-color:var(--brand);color:#05201a;font-weight:700}
+button.ghost{background:none}.mono{font-family:var(--mono);font-size:12.5px}.muted{color:var(--muted)}
+
+header{padding:22px clamp(16px,4vw,48px);border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,var(--surface),transparent);display:flex;align-items:center;gap:14px}
+.logo{width:40px;height:40px;border-radius:11px;background:var(--brand);display:grid;place-items:center;color:#05201a;font-weight:900;font-size:22px}
+header h1{margin:0;font-size:22px;letter-spacing:.02em}header .tag{color:var(--muted);font-size:12.5px;letter-spacing:.12em;text-transform:uppercase}
+main{max-width:980px;margin:0 auto;padding:clamp(20px,4vw,40px) clamp(16px,4vw,48px) 80px}
+
+.drop{border:2px dashed var(--line);border-radius:16px;padding:40px 24px;text-align:center;transition:.15s;background:var(--surface)}
+.drop.over{border-color:var(--brand);background:color-mix(in srgb,var(--brand) 8%,var(--surface))}
+.drop h2{margin:6px 0 4px;font-size:19px}.drop p{margin:0;color:var(--muted)}
+.drop .big{font-size:34px}
+.row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:16px}
+.samples{margin-top:18px;text-align:center}
+.chip{display:inline-block;margin:4px;padding:5px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);cursor:pointer;font-size:13px}
+.chip:hover{border-color:var(--brand)}.chip.phish{color:var(--high)}.chip.legit{color:var(--ok)}
+textarea{width:100%;margin-top:14px;min-height:120px;background:var(--surface);border:1px solid var(--line);border-radius:12px;color:inherit;font-family:var(--mono);font-size:12px;padding:12px}
+
+.result{margin-top:26px}.gauge{display:flex;gap:18px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px}
+.score{width:104px;height:104px;border-radius:50%;display:grid;place-items:center;flex:none;position:relative}
+.score b{font-size:30px;font-weight:800}.score span{position:absolute;bottom:18px;font-size:11px;color:var(--muted)}
+.vinfo h2{margin:0 0 4px;font-size:21px}.vinfo .sub{color:var(--muted);font-size:13.5px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:10px;color:var(--muted);font-size:13px}
+.meta b{color:var(--text);font-weight:600}
+h3{font-size:15px;margin:26px 0 10px}
+.f{background:var(--surface);border:1px solid var(--line);border-left-width:4px;border-radius:11px;padding:13px 15px;margin:9px 0}
+.f .t{font-weight:600}.f .d{color:var(--muted);font-size:13px;margin-top:3px}
+.f .ev{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:6px;word-break:break-all;background:var(--raised);padding:6px 9px;border-radius:7px}
+.badge{display:inline-block;font-size:11px;font-weight:700;border-radius:999px;padding:1px 9px;color:#09141b;margin-right:7px}
+.urls li{font-family:var(--mono);font-size:12px;word-break:break-all;color:var(--muted);margin:3px 0}
+.empty-good{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;color:var(--ok)}
+footer{max-width:980px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:var(--muted);font-size:12.5px}
+.spin{display:inline-block;width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--brand);border-radius:50%;animation:s .7s linear infinite;vertical-align:-3px;margin-right:8px}
+@keyframes s{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">P</div>
+  <div><h1>PhishGuard</h1><div class="tag">Analisador de e-mails de phishing</div></div>
+</header>
+
+<main>
+  <div class="drop" id="drop">
+    <div class="big">✉️</div>
+    <h2>Arraste um arquivo <span class="mono">.eml</span> aqui</h2>
+    <p>ou cole o conteúdo do e-mail abaixo. A análise roda localmente, nada é enviado para fora.</p>
+    <div class="row">
+      <button class="primary" id="btnFile">Escolher arquivo .eml</button>
+      <input type="file" id="file" accept=".eml,.txt,message/rfc822" hidden>
+    </div>
+    <textarea id="raw" placeholder="Cole aqui os cabeçalhos e o corpo do e-mail..."></textarea>
+    <div class="row"><button class="primary" id="btnAnalyze">Analisar</button><button class="ghost" id="btnClear">Limpar</button></div>
+    <div class="samples">
+      <p class="muted" style="margin:14px 0 2px">Ou teste com um exemplo:</p>
+      <span id="sampleChips"></span>
+    </div>
+  </div>
+
+  <div class="result" id="result" hidden></div>
+</main>
+<footer>
+  PhishGuard verifica cabeçalhos, autenticação (SPF/DKIM/DMARC), links e anexos. É uma ferramenta de apoio,
+  não um veredito definitivo. Analise sempre com cautela e nunca clique em links de e-mails suspeitos.
+</footer>
+
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const SEV={critical:'Crítico',high:'Alto',medium:'Médio',low:'Baixo',info:'Info'};
+const SEVVAR={critical:'--crit',high:'--high',medium:'--med',low:'--low',info:'--muted'};
+const cssv=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+async function analyzeText(text){
+  if(!text.trim()){alert('Cole um e-mail ou escolha um arquivo .eml');return}
+  $('#result').hidden=false;$('#result').innerHTML='<div class="gauge"><span class="spin"></span> Analisando...</div>';
+  try{
+    const r=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'text/plain'},body:text});
+    const d=await r.json();
+    if(d.error){$('#result').innerHTML=`<div class="f" style="border-left-color:var(--crit)">${esc(d.error)}</div>`;return}
+    render(d);
+  }catch(e){$('#result').innerHTML=`<div class="f" style="border-left-color:var(--crit)">Falha de conexão com o servidor.</div>`}
+}
+function render(d){
+  const col=cssv(SEVVAR[d.level]);
+  const deg=Math.round(d.score*3.6);
+  const findings=d.findings.length?`<h3>Sinais encontrados (${d.findings.length})</h3>`+d.findings.map(f=>`
+    <div class="f" style="border-left-color:var(${SEVVAR[f.severity]})">
+      <div class="t"><span class="badge" style="background:var(${SEVVAR[f.severity]})">${esc(SEV[f.severity])}</span>${esc(f.title)}</div>
+      ${f.detail?`<div class="d">${esc(f.detail)}</div>`:''}
+      ${f.evidence?`<div class="ev">${esc(f.evidence)}</div>`:''}
+    </div>`).join(''):'<div class="empty-good" style="margin-top:20px">Nenhum sinal de phishing foi detectado neste e-mail. Ainda assim, mantenha a atenção.</div>';
+  const s=d.summary;
+  const urls=d.urls.length?`<h3>Links no e-mail (${d.urls.length})</h3><ul class="urls">${d.urls.map(u=>`<li>${esc(u)}</li>`).join('')}</ul>`:'';
+  $('#result').innerHTML=`
+    <div class="gauge">
+      <div class="score" style="background:conic-gradient(${col} ${deg}deg, var(--raised) ${deg}deg)">
+        <div style="width:82px;height:82px;border-radius:50%;background:var(--surface);display:grid;place-items:center">
+          <b style="color:${col}">${d.score}</b></div>
+      </div>
+      <div class="vinfo">
+        <h2 style="color:${col}">${esc(d.verdict)}</h2>
+        <div class="sub">Pontuação de risco: ${d.score}/100</div>
+        <div class="meta">
+          <span>De: <b>${esc(s.from||'—')}</b></span>
+          <span>Domínio: <b>${esc(s.from_domain||'—')}</b></span>
+          <span>Links: <b>${s.urls}</b></span>
+          <span>Anexos: <b>${s.attachments}</b></span>
+        </div>
+        <div class="meta"><span>Assunto: <b>${esc(s.subject||'—')}</b></span></div>
+      </div>
+    </div>
+    ${findings}
+    ${urls}`;
+  $('#result').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+$('#btnFile').onclick=()=>$('#file').click();
+$('#file').onchange=async e=>{const f=e.target.files[0];if(f){const t=await f.text();$('#raw').value=t;analyzeText(t)}};
+$('#btnAnalyze').onclick=()=>analyzeText($('#raw').value);
+$('#btnClear').onclick=()=>{$('#raw').value='';$('#result').hidden=true};
+const drop=$('#drop');
+['dragover','dragenter'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over')}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over')}));
+drop.addEventListener('drop',async e=>{const f=e.dataTransfer.files[0];if(f){const t=await f.text();$('#raw').value=t;analyzeText(t)}});
+
+(async()=>{
+  try{
+    const {samples}=await (await fetch('/api/samples')).json();
+    $('#sampleChips').innerHTML=samples.map(n=>{
+      const phish=n.startsWith('phish');
+      return `<span class="chip ${phish?'phish':'legit'}" data-s="${esc(n)}">${phish?'⚠ ':'✓ '}${esc(n)}</span>`;
+    }).join('');
+    document.querySelectorAll('.chip').forEach(c=>c.onclick=async()=>{
+      const {content}=await (await fetch('/api/sample/'+c.dataset.s)).json();
+      $('#raw').value=content;analyzeText(content);
+    });
+  }catch(e){}
+})();
+</script>
+</body>
+</html>

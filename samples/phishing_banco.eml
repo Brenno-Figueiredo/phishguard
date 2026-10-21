@@ -1,0 +1,16 @@
+From: Banco Bradesco Seguranca <seguranca@bradesco-alertas.xyz>
+Reply-To: suporte@contas-online.ru
+To: cliente@exemplo.com
+Subject: URGENTE: Sua conta sera bloqueada em 24 horas - Confirme seus dados
+Date: Mon, 20 Oct 2026 09:12:00 -0300
+Authentication-Results: mx.exemplo.com; spf=fail smtp.mailfrom=bradesco-alertas.xyz;
+ dkim=none; dmarc=fail
+Content-Type: text/html; charset=utf-8
+
+<html><body>
+<p>Prezado cliente,</p>
+<p>Detectamos uma atividade suspeita. Sua conta sera <b>bloqueada</b> em 24 horas.</p>
+<p>Para evitar o bloqueio, <b>clique aqui</b> e confirme seus dados imediatamente:</p>
+<p><a href="http://191.101.22.14/bradesco/login.php">https://www.bradesco.com.br/login</a></p>
+<p>Regularize sua pendencia com urgencia.</p>
+</body></html>

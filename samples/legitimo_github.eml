@@ -1,0 +1,16 @@
+From: Equipe GitHub <noreply@github.com>
+Reply-To: noreply@github.com
+To: brenno@exemplo.com
+Subject: [GitHub] Um novo login na sua conta
+Date: Wed, 21 Oct 2026 10:00:00 -0300
+Authentication-Results: mx.exemplo.com; spf=pass smtp.mailfrom=github.com;
+ dkim=pass header.d=github.com; dmarc=pass
+Content-Type: text/html; charset=utf-8
+
+<html><body>
+<p>Ola Brenno,</p>
+<p>Detectamos um novo login na sua conta a partir de um novo dispositivo.</p>
+<p>Se foi voce, nenhuma acao e necessaria. Caso contrario, revise sua seguranca:</p>
+<p><a href="https://github.com/settings/security">https://github.com/settings/security</a></p>
+<p>Equipe GitHub</p>
+</body></html>

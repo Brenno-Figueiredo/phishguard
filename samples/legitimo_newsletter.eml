@@ -1,0 +1,11 @@
+From: Loja Nerd Drip <contato@nerddrip.com.br>
+To: cliente@exemplo.com
+Subject: Novidades da semana - novos drops chegaram!
+Date: Mon, 20 Oct 2026 08:00:00 -0300
+Authentication-Results: mx.exemplo.com; spf=pass; dkim=pass header.d=nerddrip.com.br; dmarc=pass
+Content-Type: text/html; charset=utf-8
+
+<html><body>
+<p>Confira os novos lancamentos:</p>
+<p><a href="https://nerddrip.com.br/novidades">Ver novidades</a></p>
+</body></html>

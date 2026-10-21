@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.vscode/
+.idea/
+
+# E-mails reais analisados e relatórios (podem conter dados pessoais)
+*.eml
+!samples/*.eml
+relatorio*.json
